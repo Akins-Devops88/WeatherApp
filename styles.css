@@ -1,0 +1,931 @@
+/* ================================================================
+   Weather App — styles.css
+   Colour palette:
+     Navy  #1A3C5E  → header background
+     Teal  #2E86AB  → hero card background, buttons, accents
+     White #ffffff  → forecast / stat cards
+     Off-white #f0f4f8 → page background, forecast row fills
+   ================================================================ */
+
+
+/* ── RESET ────────────────────────────────────────────────────────
+   Removes all default browser margin and padding from every element
+   and switches to border-box sizing so padding/border are included
+   inside an element's declared width/height (not added on top).
+   ──────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+
+/* ── CSS CUSTOM PROPERTIES (VARIABLES) ───────────────────────────
+   Defined on :root so they are available everywhere in the file.
+   Change a value here once and it updates every place it is used.
+   ──────────────────────────────────────────────────────────────── */
+:root {
+  --navy:       #1A3C5E;   /* dark blue — header */
+  --navy-dark:  #122d47;   /* darker shade for hover states */
+  --teal:       #2E86AB;   /* medium blue — hero card, buttons */
+  --teal-light: #3a9ec7;   /* lighter teal for hover effects */
+  --white:      #ffffff;   /* pure white — cards */
+  --off-white:  #f0f4f8;   /* very light blue-grey — page background */
+  --text-dark:  #1a2a3a;   /* near-black — primary text */
+  --text-mid:   #4a6278;   /* medium grey-blue — secondary text / labels */
+  --error-bg:   #fef2f2;   /* pale red — error card background */
+  --error-text: #b91c1c;   /* deep red — error message text */
+  --radius:     12px;      /* standard corner radius for cards */
+  --shadow:     0 4px 20px rgba(0,0,0,0.12); /* subtle card drop shadow */
+}
+
+
+/* ── BASE BODY STYLES ────────────────────────────────────────────
+   Sets the page background colour, default font, and removes the
+   default browser body margin.
+   ──────────────────────────────────────────────────────────────── */
+body {
+  font-family: Arial;
+  /* Light blue-grey page background so the white app container
+     "lifts off" visually against it */
+  background: #eef3f9;
+  margin: 0;
+}
+
+
+/* ── APP CONTAINER ───────────────────────────────────────────────
+   The outer white card that holds everything.
+   max-width centres the layout on desktop (with margin:auto adding
+   equal space on both sides). On screens narrower than 760px the
+   container simply fills the available width.
+   min-height:100vh makes the card always fill the full screen height
+   even when there is little content.
+   ──────────────────────────────────────────────────────────────── */
+.app-container {
+  max-width: 760px;      /* centred column on desktop */
+  margin: 0 auto;        /* auto left+right margins = horizontal centring */
+  background: var(--white);
+  min-height: 100vh;     /* always fill the screen height */
+  border-radius: var(--radius);
+  overflow: hidden;      /* clips child elements to rounded corners */
+}
+
+
+/* ── HEADER ──────────────────────────────────────────────────────
+   Navy top bar displaying the app name.
+   position:sticky keeps it visible as the user scrolls down.
+   ──────────────────────────────────────────────────────────────── */
+.header {
+  background: var(--navy);
+  color: var(--white);
+  padding: 18px 20px;
+  position: sticky;      /* sticks to the top of the viewport on scroll */
+  top: 0;
+  z-index: 100;          /* sits above all other content */
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+/* App title text inside the header */
+.app-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+
+/* ── MAIN CONTENT AREA ───────────────────────────────────────────
+   Adds internal padding so sections don't touch the container edges.
+   display:flex + column + gap produces consistent vertical spacing
+   between every section without needing individual margin values.
+   ──────────────────────────────────────────────────────────────── */
+.main-content {
+  padding: 16px;
+  display: flex;
+  flex-direction: column; /* stacks child sections vertically */
+  gap: 16px;              /* uniform gap between every section */
+}
+
+
+/* ── SEARCH SECTION ──────────────────────────────────────────────
+   No extra styling needed beyond what the wrapper and input provide.
+   ──────────────────────────────────────────────────────────────── */
+
+
+/* Flex row: input stretches to fill available space, button stays fixed */
+.search-wrapper {
+  display: flex;
+  gap: 8px;
+}
+
+/* City search input field */
+.search-input {
+  flex: 1;               /* takes all remaining width after the button */
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  outline: none;         /* removes browser default blue focus ring */
+  transition: border-color 0.2s ease;
+}
+
+/* Highlight the input border when the user clicks into it */
+.search-input:focus {
+  border-color: var(--teal);
+}
+
+/* Teal "Search" button */
+.search-btn {
+  background: var(--teal);
+  color: var(--white);
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;   /* prevents the word "Search" from wrapping */
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+/* Darken button and lift it slightly on hover */
+.search-btn:hover {
+  background: var(--teal-light);
+  transform: translateY(-1px);
+}
+
+/* Snap back on click */
+.search-btn:active {
+  transform: translateY(0);
+}
+
+
+/* ── SEARCH HISTORY BAR ──────────────────────────────────────────
+   Wrapping flex row of city chips that appear below the search box.
+   Chips are injected dynamically by renderHistory() in script.js.
+   ──────────────────────────────────────────────────────────────── */
+.history-bar {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;       /* chips wrap to a new line if they don't all fit */
+  gap: 6px;
+}
+
+/* Each history chip: a pill-shaped button containing city name + ✕ */
+.history-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #d9e8f5;   /* light blue tint — matches the navy header palette */
+  border: 1px solid #bcd3e6;
+  border-radius: 20px;   /* pill shape */
+  padding: 4px 10px 4px 12px;
+  font-size: 0.8rem;
+  transition: background 0.2s ease;
+}
+
+.history-chip:hover {
+  background: #c4daf0;
+}
+
+/* City name label inside the chip — clicking searches for that city */
+.history-chip-label {
+  color: #1e3a5f;
+  cursor: pointer;
+  user-select: none;     /* prevents accidental text selection on click */
+}
+
+/* ✕ delete button inside each chip — removes only that city */
+.history-chip-delete {
+  background: none;
+  border: none;
+  color: #5a7a96;
+  font-size: 0.7rem;
+  cursor: pointer;
+  padding: 0 2px;
+  border-radius: 50%;
+  line-height: 1;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.history-chip-delete:hover {
+  color: #1e3a5f;
+  background: rgba(0,0,0,0.08);
+}
+
+
+/* ── LOADING INDICATOR ───────────────────────────────────────────
+   Shown while API requests are in flight.
+   Hidden by the .hidden utility class when not needed.
+   ──────────────────────────────────────────────────────────────── */
+.loading {
+  text-align: center;
+  padding: 40px 20px;
+  font-size: 1.1rem;
+  color: var(--text-mid);
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+
+/* ── ERROR MESSAGE ───────────────────────────────────────────────
+   Red-tinted card that appears when a search fails or geolocation
+   is denied. The left border makes it easy to spot at a glance.
+   ──────────────────────────────────────────────────────────────── */
+.error-msg {
+  background: var(--error-bg);
+  color: var(--error-text);
+  padding: 16px 20px;
+  border-radius: var(--radius);
+  font-weight: 600;
+  border-left: 4px solid var(--error-text); /* red accent stripe */
+  font-size: 0.97rem;
+}
+
+
+/* ================================================================
+   HERO SECTION — current weather card
+   ================================================================ */
+
+/* Teal gradient-free card that holds the main weather display */
+.hero {
+  background: var(--teal);
+  color: var(--white);
+  border-radius: var(--radius);
+  padding: 36px 24px 28px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+
+/* City name heading */
+.city-name {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+/* Country name below the city */
+.country-name {
+  font-size: 1rem;
+  opacity: 0.8;          /* slightly faded to de-emphasise vs city name */
+  margin-bottom: 16px;
+}
+
+/* Large temperature display, e.g. "24°C" */
+.temperature {
+  font-size: 3.5rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+/* Plain-English condition text below the temperature */
+.weather-desc {
+  font-size: 1.15rem;
+  opacity: 0.9;
+  margin-bottom: 18px;
+  text-transform: capitalize; /* e.g. "partly cloudy" → "Partly cloudy" */
+}
+
+
+/* ── UNIT TOGGLE (°C / °F) ───────────────────────────────────────
+   Two buttons in a pill-shaped container.
+   The active button has a semi-transparent white fill.
+   ──────────────────────────────────────────────────────────────── */
+.unit-toggle {
+  display: inline-flex;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.4);
+}
+
+/* Base style for both unit buttons */
+.unit-btn {
+  background: transparent;
+  color: rgba(255,255,255,0.7);  /* dimmed when inactive */
+  border: none;
+  padding: 6px 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* The currently selected unit button */
+.unit-btn.active {
+  background: rgba(255,255,255,0.25);
+  color: var(--white);
+}
+
+/* Hover effect for the non-active button */
+.unit-btn:hover:not(.active) {
+  background: rgba(255,255,255,0.1);
+  color: var(--white);
+}
+
+
+/* ================================================================
+   CSS-DRAWN ANIMATED HERO ICON
+   Each weather type gets its own class on .hero-icon and its own
+   set of child elements injected by script.js.
+   Animations are defined with @keyframes below each icon type.
+   ================================================================ */
+
+/* Shared wrapper — fixed 100×100 px square, contents centred */
+.hero-icon {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 16px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── ☀ CLEAR SKY — spinning sun ─────────────────────────────────
+   A yellow circle (sun body) surrounded by eight ray spokes
+   that all rotate together continuously.
+   ──────────────────────────────────────────────────────────────── */
+.hero-icon.icon-clear {
+  animation: spinSun 8s linear infinite; /* whole group rotates */
+}
+
+/* Circular sun body */
+.hero-icon.icon-clear .sun-body {
+  width: 52px;
+  height: 52px;
+  background: #FFD600;
+  border-radius: 50%;
+  box-shadow: 0 0 18px 6px rgba(255,214,0,0.45); /* warm glow */
+  position: absolute;
+  z-index: 1;
+}
+
+/* Container for the eight ray spokes — rotates with the parent */
+.hero-icon.icon-clear .sun-rays {
+  position: absolute;
+  inset: 0;              /* fills the 100×100 hero-icon box */
+}
+
+/* Each individual ray — a tall narrow pill rotated around the centre */
+.hero-icon.icon-clear .sun-rays span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 18px;
+  background: #FFD600;
+  border-radius: 4px;
+  /* transform-origin moves the pivot to 50px below the span's top edge,
+     which is the centre of the 100px icon box */
+  transform-origin: 4px 50px;
+  margin-left: -4px;
+  margin-top: -50px;
+}
+
+/* Rotate each of the 8 rays evenly around the circle (360 / 8 = 45°) */
+.hero-icon.icon-clear .sun-rays span:nth-child(1) { transform: rotate(0deg);   }
+.hero-icon.icon-clear .sun-rays span:nth-child(2) { transform: rotate(45deg);  }
+.hero-icon.icon-clear .sun-rays span:nth-child(3) { transform: rotate(90deg);  }
+.hero-icon.icon-clear .sun-rays span:nth-child(4) { transform: rotate(135deg); }
+.hero-icon.icon-clear .sun-rays span:nth-child(5) { transform: rotate(180deg); }
+.hero-icon.icon-clear .sun-rays span:nth-child(6) { transform: rotate(225deg); }
+.hero-icon.icon-clear .sun-rays span:nth-child(7) { transform: rotate(270deg); }
+.hero-icon.icon-clear .sun-rays span:nth-child(8) { transform: rotate(315deg); }
+
+/* Continuous clockwise rotation */
+@keyframes spinSun {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+
+/* ── ⛅ CLOUDY — gently floating cloud ──────────────────────────
+   A rounded rectangle (cloud body) with two circle "puffs" on top,
+   drawn entirely with CSS border-radius. The whole icon bobs up/down.
+   ──────────────────────────────────────────────────────────────── */
+.hero-icon.icon-cloudy {
+  animation: floatCloud 3s ease-in-out infinite;
+}
+
+/* Main wide cloud body */
+.hero-icon.icon-cloudy .cloud {
+  width: 80px;
+  height: 36px;
+  background: rgba(255,255,255,0.9);
+  border-radius: 20px;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Left puff sitting above the cloud body */
+.hero-icon.icon-cloudy .cloud::before {
+  content: '';
+  width: 40px;
+  height: 40px;
+  background: rgba(255,255,255,0.9);
+  border-radius: 50%;
+  position: absolute;
+  top: -22px;
+  left: 14px;
+}
+
+/* Right puff — slightly smaller and offset to the right */
+.hero-icon.icon-cloudy .cloud::after {
+  content: '';
+  width: 28px;
+  height: 28px;
+  background: rgba(255,255,255,0.9);
+  border-radius: 50%;
+  position: absolute;
+  top: -14px;
+  left: 38px;
+}
+
+/* Smooth up-and-down bobbing */
+@keyframes floatCloud {
+  0%, 100% { transform: translateY(0);   }
+  50%       { transform: translateY(-8px); }
+}
+
+
+/* ── 🌧 RAIN / DRIZZLE — bouncing drops ─────────────────────────
+   Same cloud shape as cloudy, with four teardrop pill elements
+   below it that fall in sequence using staggered animation-delay.
+   ──────────────────────────────────────────────────────────────── */
+
+/* Cloud body for rain icon */
+.hero-icon.icon-rain .cloud {
+  width: 72px;
+  height: 32px;
+  background: rgba(255,255,255,0.85);
+  border-radius: 18px;
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%); /* horizontally centred */
+  box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+}
+
+.hero-icon.icon-rain .cloud::before {
+  content: '';
+  width: 34px;
+  height: 34px;
+  background: rgba(255,255,255,0.85);
+  border-radius: 50%;
+  position: absolute;
+  top: -18px;
+  left: 10px;
+}
+
+.hero-icon.icon-rain .cloud::after {
+  content: '';
+  width: 24px;
+  height: 24px;
+  background: rgba(255,255,255,0.85);
+  border-radius: 50%;
+  position: absolute;
+  top: -12px;
+  left: 36px;
+}
+
+/* Row of rain drop elements sitting below the cloud */
+.hero-icon.icon-rain .drops {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+}
+
+/* Each individual drop — a narrow pill shape */
+.hero-icon.icon-rain .drops span {
+  width: 5px;
+  height: 14px;
+  background: rgba(255,255,255,0.9);
+  border-radius: 0 0 5px 5px; /* rounded bottom, flat top */
+  animation: rainDrop 1.1s ease-in-out infinite;
+}
+
+/* Staggered delays so drops fall one after another, not all at once */
+.hero-icon.icon-rain .drops span:nth-child(1) { animation-delay: 0s;    }
+.hero-icon.icon-rain .drops span:nth-child(2) { animation-delay: 0.2s;  }
+.hero-icon.icon-rain .drops span:nth-child(3) { animation-delay: 0.4s;  }
+.hero-icon.icon-rain .drops span:nth-child(4) { animation-delay: 0.15s; }
+
+/* Drop fades in above, falls downward, and fades out */
+@keyframes rainDrop {
+  0%   { transform: translateY(-4px);  opacity: 0; }
+  30%  { opacity: 1; }
+  100% { transform: translateY(16px);  opacity: 0; }
+}
+
+
+/* ── ❄ SNOW — drifting flakes ────────────────────────────────────
+   Cloud with three small circles below it that drift down while
+   rotating, mimicking falling snowflakes.
+   ──────────────────────────────────────────────────────────────── */
+
+/* Cloud body for snow icon */
+.hero-icon.icon-snow .cloud {
+  width: 72px;
+  height: 32px;
+  background: rgba(255,255,255,0.85);
+  border-radius: 18px;
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+}
+
+.hero-icon.icon-snow .cloud::before {
+  content: '';
+  width: 34px;
+  height: 34px;
+  background: rgba(255,255,255,0.85);
+  border-radius: 50%;
+  position: absolute;
+  top: -18px;
+  left: 10px;
+}
+
+/* Row of snowflake dots */
+.hero-icon.icon-snow .flakes {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+}
+
+/* Each snowflake — a small white circle */
+.hero-icon.icon-snow .flakes span {
+  width: 7px;
+  height: 7px;
+  background: rgba(255,255,255,0.95);
+  border-radius: 50%;
+  animation: snowFall 1.4s ease-in-out infinite;
+}
+
+.hero-icon.icon-snow .flakes span:nth-child(1) { animation-delay: 0s;   }
+.hero-icon.icon-snow .flakes span:nth-child(2) { animation-delay: 0.3s; }
+.hero-icon.icon-snow .flakes span:nth-child(3) { animation-delay: 0.6s; }
+
+/* Flake falls downward while spinning, then fades out */
+@keyframes snowFall {
+  0%   { transform: translateY(-4px)  rotate(0deg);   opacity: 0; }
+  30%  { opacity: 1; }
+  100% { transform: translateY(18px)  rotate(180deg); opacity: 0; }
+}
+
+
+/* ── ⛈ THUNDERSTORM — flashing lightning bolt ───────────────────
+   Cloud with a CSS-triangle lightning bolt below it that pulses
+   in opacity and scale to simulate a flash effect.
+   ──────────────────────────────────────────────────────────────── */
+
+/* Cloud body for storm icon */
+.hero-icon.icon-storm .cloud {
+  width: 72px;
+  height: 32px;
+  background: rgba(255,255,255,0.8);
+  border-radius: 18px;
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.hero-icon.icon-storm .cloud::before {
+  content: '';
+  width: 34px;
+  height: 34px;
+  background: rgba(255,255,255,0.8);
+  border-radius: 50%;
+  position: absolute;
+  top: -18px;
+  left: 10px;
+}
+
+/* Lightning bolt drawn using the CSS border trick:
+   zero-width/height element with coloured borders creates a triangle */
+.hero-icon.icon-storm .bolt {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left:  14px solid transparent;
+  border-right: 6px  solid transparent;
+  border-top:   26px solid #FFD600; /* yellow triangle pointing down */
+  filter: drop-shadow(0 0 6px #FFD600); /* golden glow */
+  animation: boltFlash 1.6s ease-in-out infinite;
+}
+
+/* Small upward-pointing triangle attached to the bottom of the bolt */
+.hero-icon.icon-storm .bolt::after {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: -6px;
+  width: 0;
+  height: 0;
+  border-left:  6px  solid transparent;
+  border-right: 14px solid transparent;
+  border-bottom: 20px solid #FFD600;
+}
+
+/* Bolt pulses between full brightness and near-invisible */
+@keyframes boltFlash {
+  0%, 100% { opacity: 1;   transform: translateX(-50%) scale(1);   }
+  50%       { opacity: 0.3; transform: translateX(-50%) scale(0.9); }
+}
+
+
+/* ── 🌫 FOG — drifting horizontal bands ─────────────────────────
+   Four pill-shaped bars of different widths that slide left and
+   right alternately, giving the impression of drifting mist.
+   ──────────────────────────────────────────────────────────────── */
+.hero-icon.icon-fog {
+  flex-direction: column; /* stack the fog lines vertically */
+  gap: 8px;
+}
+
+/* Each fog line is a white pill-shaped bar */
+.hero-icon.icon-fog .fog-line {
+  height: 8px;
+  background: rgba(255,255,255,0.75);
+  border-radius: 4px;
+  animation: fogDrift 3s ease-in-out infinite;
+}
+
+/* Different widths and delays create an organic, uneven fog look */
+.hero-icon.icon-fog .fog-line:nth-child(1) { width: 80px; animation-delay: 0s;   }
+.hero-icon.icon-fog .fog-line:nth-child(2) { width: 60px; animation-delay: 0.4s; }
+.hero-icon.icon-fog .fog-line:nth-child(3) { width: 72px; animation-delay: 0.8s; }
+.hero-icon.icon-fog .fog-line:nth-child(4) { width: 50px; animation-delay: 1.2s; }
+
+/* Each line drifts right then back */
+@keyframes fogDrift {
+  0%, 100% { transform: translateX(0);    opacity: 0.75; }
+  50%       { transform: translateX(8px); opacity: 1;    }
+}
+
+
+/* ── STATS ROW ───────────────────────────────────────────────────
+   Three equal-width cards in a row using CSS Grid.
+   Each card has an icon, a value, and a label stacked vertically.
+   ──────────────────────────────────────────────────────────────── */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 equal columns */
+  gap: 12px;
+}
+
+/* Individual stat card */
+.stat-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 20px 12px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column; /* icon → value → label stacked */
+  align-items: center;
+  gap: 6px;
+}
+
+/* Large emoji icon at the top of each stat card */
+.stat-icon {
+  font-size: 1.8rem;
+}
+
+/* The numeric or text value in teal */
+.stat-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--teal);
+}
+
+/* Small uppercase label below the value */
+.stat-label {
+  font-size: 0.78rem;
+  color: var(--text-mid);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+
+/* ── 5-DAY FORECAST ──────────────────────────────────────────────
+   White card containing five horizontal rows — one per day.
+   Each row shows the day name, a weather emoji, and high/low temps.
+   ──────────────────────────────────────────────────────────────── */
+.forecast {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+
+/* "5-DAY FORECAST" heading above the rows */
+.forecast-title {
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-mid);
+  margin-bottom: 16px;
+}
+
+/* Vertical stack of forecast day rows */
+.forecast-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Individual forecast row — flex row with space-between layout */
+.forecast-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  background: var(--off-white); /* light blue-grey tint per row */
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Lift the row slightly on hover */
+.forecast-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+}
+
+/* Day name on the left, e.g. "Monday" */
+.forecast-day {
+  flex: 1;
+  text-align: left;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+/* Weather emoji in the middle */
+.forecast-icon {
+  flex: 1;
+  text-align: center;
+  font-size: 1.5rem;
+}
+
+/* High/low temperature pair on the right */
+.forecast-temps {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end; /* push temps to the right edge */
+  gap: 10px;
+}
+
+/* Bold high temperature */
+.temp-high {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+/* Muted low temperature */
+.temp-low {
+  font-size: 1rem;
+  color: var(--text-mid);
+}
+
+
+/* ── GEOLOCATION BUTTON ──────────────────────────────────────────
+   Fixed circular button pinned to the bottom-right corner.
+   position:fixed keeps it visible regardless of scroll position.
+   ──────────────────────────────────────────────────────────────── */
+.geo-btn {
+  position: fixed;       /* stays in the corner while scrolling */
+  bottom: 24px;
+  right: 24px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;    /* makes it a perfect circle */
+  background: var(--navy);
+  color: var(--white);
+  font-size: 1.4rem;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  transition: background 0.2s ease, transform 0.2s ease;
+  z-index: 200;          /* always on top of all other content */
+}
+
+/* Switch to teal and grow slightly on hover */
+.geo-btn:hover {
+  background: var(--teal);
+  transform: scale(1.08);
+}
+
+
+/* ── UTILITY: HIDDEN ─────────────────────────────────────────────
+   !important ensures .hidden always wins even if other rules try
+   to set display. Used by JS to show/hide sections.
+   ──────────────────────────────────────────────────────────────── */
+.hidden {
+  display: none !important;
+}
+
+
+/* ── ACCESSIBILITY: REDUCED MOTION ──────────────────────────────
+   If the user has enabled "reduce motion" in their OS settings,
+   all CSS animations are disabled to prevent nausea / discomfort.
+   ──────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .hero-icon,
+  .hero-icon * {
+    animation: none !important;
+  }
+}
+
+
+/* ── RESPONSIVE: TABLET (≤ 600px) ───────────────────────────────
+   Minor adjustments for medium-small screens.
+   ──────────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .temperature {
+    font-size: 2.8rem;
+  }
+
+  .forecast-card {
+    padding: 10px 12px;
+  }
+}
+
+
+/* ── RESPONSIVE: MOBILE (≤ 480px) ───────────────────────────────
+   Smaller text and tighter padding to fit narrow phone screens.
+   ──────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+
+  /* Shrink the hero temperature on very small screens */
+  .temperature {
+    font-size: 2.5rem;
+  }
+
+  /* Shrink city name slightly */
+  .city-name {
+    font-size: 1.6rem;
+  }
+
+  /* Tighter padding on the hero card */
+  .hero {
+    padding: 28px 16px 22px;
+  }
+
+  /* Keep stats as 3 columns but tighten padding */
+  .stats {
+    gap: 8px;
+  }
+
+  .stat-card {
+    padding: 14px 8px;
+  }
+
+  /* Smaller stat value text on tiny screens */
+  .stat-value {
+    font-size: 1.1rem;
+  }
+
+  /* Tighter forecast rows */
+  .forecast-card {
+    padding: 10px;
+  }
+
+  .forecast-day {
+    font-size: 0.82rem;
+  }
+
+  .forecast-icon {
+    font-size: 1.2rem;
+  }
+
+  .temp-high,
+  .temp-low {
+    font-size: 0.85rem;
+  }
+
+  /* Smaller geo button on mobile */
+  .geo-btn {
+    bottom: 16px;
+    right: 16px;
+    width: 46px;
+    height: 46px;
+    font-size: 1.2rem;
+  }
+}

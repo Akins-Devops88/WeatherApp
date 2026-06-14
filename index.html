@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<!-- Declares the document type as HTML5 so the browser renders it in standards mode -->
+<html lang="en">
+<!-- lang="en" tells screen readers and search engines this page is in English -->
+
+<head>
+  <!-- HEAD: contains invisible metadata and linked resources -->
+
+  <meta charset="UTF-8" />
+  <!-- UTF-8 character encoding so emojis and special characters display correctly -->
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Makes the layout responsive: the page width matches the device screen width
+       and starts at zoom level 1 (no zoom). Without this, mobile browsers would
+       render the page at desktop width and shrink it down. -->
+
+  <title>Weather App</title>
+  <!-- The title text shown in the browser tab -->
+
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Links the external CSS file to this HTML page -->
+</head>
+
+<body>
+  <!-- BODY: All content are visible on the page -->
+
+  <!-- ══════════════════════════════════════════════════════
+       APP CONTAINER
+       A centred column that caps width at 760px on desktop
+       and expands to full width on mobile.
+       ══════════════════════════════════════════════════════ -->
+  <div class="app-container">
+
+    <!-- ── HEADER ────────────────────────────────────────────
+         Sticky top bar showing only the app name and logo.
+         ──────────────────────────────────────────────────── -->
+    <header class="header">
+      <span class="app-title">⛅ Weather App</span>
+      <!-- The cloud emoji acts as a logo beside the app name -->
+    </header>
+
+    <!-- ── MAIN CONTENT ──────────────────────────────────────
+         All interactive and display content sits inside <main>
+    
+         ──────────────────────────────────────────────────── -->
+    <main class="main-content">
+
+      <!-- ── SEARCH SECTION ────────────────────────────────
+           Contains the city search input, button, and the
+           quick-access history chips shown below it.
+           ──────────────────────────────────────────────── -->
+      <section class="search-section">
+
+        <!-- Flex row: input on the left, button on the right -->
+        <div class="search-wrapper">
+          <input
+            type="text"
+            id="cityInput"
+            class="search-input"
+            placeholder="Search city…"
+            autocomplete="off"
+          />
+          <!-- autocomplete="off" prevents the browser from showing its own
+               dropdown which would overlap with our history chips -->
+
+          <!-- onclick calls handleSearch() in script.js when clicked -->
+          <button id="searchBtn" class="search-btn" onclick="handleSearch()">
+            Search
+          </button>
+        </div>
+
+        <!-- History chips are injected here by renderHistory() in script.js.
+             Each chip is a mini button showing a previously searched city.
+             Cleared on every page refresh. -->
+        <div id="historyBar" class="history-bar"></div>
+
+      </section>
+      <!-- /search-section -->
+
+      <!-- ── LOADING DISPLAY INDICATOR ──────────────────────────────
+           Shown while API calls are in progress.
+           aria-live="polite" announces the text to screen readers
+           without interrupting what they were already reading.
+           Hidden by default via the .hidden CSS class.
+           ──────────────────────────────────────────────── -->
+      <div id="loading" class="loading hidden" aria-live="polite">
+        Loading…
+      </div>
+
+      <!-- ── ERROR DISPLAY MESSAGE ──────────────────────────────────
+           Shown when a search fails or geolocation is denied.
+           role="alert" makes screen readers announce this immediately.
+           Hidden by default.
+           ──────────────────────────────────────────────── -->
+      <div id="errorMsg" class="error-msg hidden" role="alert"></div>
+
+      <!-- ── HERO SECTION: CURRENT WEATHER ─────────────────
+           The main weather display card showing:
+           animated icon · city · temperature · description · unit toggle.
+           Hidden until a successful API response arrives.
+           ──────────────────────────────────────────────── -->
+      <section id="heroSection" class="hero hidden">
+
+        <!-- CSS-drawn animated weather icon.
+             script.js sets className (e.g. "hero-icon icon-clear") and
+             injects the inner HTML shapes (rays, drops, etc.).
+             aria-hidden="true" hides it from screen readers because
+             the weather description text already conveys the meaning. -->
+        <div class="hero-icon" id="heroIcon" aria-hidden="true"></div>
+
+        <!-- City and country name, shown by displayCurrentWeather() -->
+        <h1 id="cityName" class="city-name"></h1>
+        <p id="countryName" class="country-name"></p>
+
+        <!-- Current temperature, e.g. "20°C" — updated by formatTemp() -->
+        <div class="temperature" id="temperature"></div>
+
+        <!--  weather condition, e.g. "Cloudy" -->
+        <p id="weatherDesc" class="weather-desc"></p>
+
+        <!-- °C / °F TOGGLE BUTTON ──────────────────────────────────
+             Two buttons that call setUnit() in script.js.
+             The active button has the .active class for styling.
+             aria-pressed tells screen readers which is selected. -->
+        <div class="unit-toggle">
+          <button id="btnC" class="unit-btn active" onclick="setUnit('C')" aria-pressed="true">°C</button>
+          <button id="btnF" class="unit-btn"        onclick="setUnit('F')" aria-pressed="false">°F</button>
+        </div>
+
+      </section>
+      <!-- /heroSection -->
+
+      <!-- ── STATS ROW DISPLAY──────────────────────────────────────
+           Three cards below the hero showing extra details:
+           Humidity · Wind Speed · UV Index.
+           Hidden until weather data loads.
+           ──────────────────────────────────────────────── -->
+      <section id="statsSection" class="stats hidden">
+
+        <div class="stat-card">
+          <span class="stat-icon">💧</span>
+          <!-- Shows Humidity percentage, e.g. "50%" -->
+          <span class="stat-value" id="humidity">–</span>
+          <span class="stat-label">Humidity</span>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-icon">💨</span>
+          <!-- Show Wind speed in km/h, e.g. "10 km/h" -->
+          <span class="stat-value" id="windSpeed">–</span>
+          <span class="stat-label">Wind Speed</span>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-icon">🌞</span>
+          <!-- Display UV index data from the API, e.g. low -->
+          <span class="stat-value" id="uvIndex">–</span>
+          <span class="stat-label">UV Index</span>
+        </div>
+
+      </section>
+      <!-- /statsSection -->
+
+      <!-- ── 5-DAY FORECAST SECTION─────────────────────────────────
+           A vertical list of five daily forecast rows,
+           each showing: day name · weather icon · high/low temps.
+           Cards are built dynamically by displayForecast() in script.js.
+           Hidden until weather data loads.
+           ──────────────────────────────────────────────── -->
+      <section id="forecastSection" class="forecast hidden">
+        <h2 class="forecast-title">5-Day Forecast</h2>
+
+        <!-- Empty container; forecast cards are injected here by JS -->
+        <div id="forecastGrid" class="forecast-grid"></div>
+      </section>
+      <!-- /forecastSection -->
+
+    </main>
+    <!-- /main-content -->
+
+    <!-- ── GEOLOCATION BUTTON ─────────────────────────────────
+         Fixed floating button in the bottom-right corner.
+         Clicking it calls useGeolocation() in script.js,
+         which asks the browser for the user's GPS coordinates.
+         title provides a tooltip on hover; aria-label provides
+         an accessible name for screen readers.
+         ──────────────────────────────────────────────────── -->
+    <button
+      id="geoBtn"
+      class="geo-btn"
+      onclick="useGeolocation()"
+      title="Use my location"
+      aria-label="Detect my location"
+    >
+      📍
+    </button>
+
+  </div>
+  <!-- /app-container -->
+
+  <!-- script.js is loaded at the bottom of <body> so all HTML elements
+       above exist in the DOM before the script tries to reference them -->
+  <script src="script.js"></script>
+
+</body>
+</html>
